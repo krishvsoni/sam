@@ -10,7 +10,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@permaweb/aoconnect": "^0.0.56",
     "axios": "^1.7.2",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "gql": "^1.1.2",
+    "graphql-tag": "^2.12.6"
   }
 }
