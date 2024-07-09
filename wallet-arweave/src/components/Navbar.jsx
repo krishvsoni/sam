@@ -1,23 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 import Wallet from './Wallet';
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
   return (
-    <nav className="bg-base-100 shadow-lg font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-base-100 shadow-lg font-mono">
+      <div className="max-w-9xl mx-auto px-6 sm:px-10 lg:px-10">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <div className="relative">
-              <button
-                className="btn btn-square btn-ghost"
-                onClick={toggleDropdown}
-              >
+            {!isHomePage && (
+              <label htmlFor="my-drawer" className="btn btn-square btn-ghost drawer-button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -31,34 +26,38 @@ const Navbar = () => {
                     d="M4 6h16M4 12h16M4 18h16"
                   ></path>
                 </svg>
-              </button>
-              {isOpen && (
-                <div className="origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-base-100 ring-1 ring-black ring-opacity-5 font-sans">
-                  <div className="py-1">
-                    <button className="block px-4 py-2 text-sm text-white hover:bg-white hover:text-black w-full text-left">
-                      Dropdown Item 1
-                    </button>
-                    <button className="block px-4 py-2 text-sm text-white hover:bg-white hover:text-black w-full text-left">
-                      Dropdown Item 2
-                    </button>
-                    <button className="block px-4 py-2 text-sm text-white hover:bg-white hover:text-black w-full text-left">
-                      Dropdown Item 3
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+              </label>
+            )}
           </div>
-          <div className="flex-1 text-center">
-            <a className="btn btn-ghost text-xl">SAM</a>
+          <div className="flex-1 text-left">
+            <a href="/" className="btn btn-ghost text-2xl font-extrabold">SAM</a>
           </div>
           <div className="flex items-center ml-auto space-x-4">
-            <div className="hidden sm:block">
-              <Wallet />
-            </div>
+            <Wallet />
           </div>
         </div>
       </div>
+      {!isHomePage && (
+        <div className="drawer">
+          <input id="my-drawer" type="checkbox" className="drawer-toggle" />
+          <div className="drawer-content"></div>
+          <div className="drawer-side">
+            <label htmlFor="my-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
+            <ul className="menu bg-base-200 text-base-content text-lg min-h-full w-80 p-4">
+              <li><a href="/monitor">Monitor</a></li>
+              <li><a href="/">Analyzer</a></li>
+              <li className="mt-auto">
+                <a
+                  href="/prices"
+                  className="btn btn-primary bg-blue-500 text-white rounded hover:bg-blue-700 w-full text-lg"
+                >
+                  View Prices
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

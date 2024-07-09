@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import axios from "axios";
 import { Doughnut } from 'react-chartjs-2';
@@ -7,28 +7,57 @@ import 'chart.js/auto';
 
 const MonitorDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [processEdges, setProcessEdges] = useState([]);
     const [donutChartData, setDonutChartData] = useState({});
+    const [isWalletConnected, setIsWalletConnected] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        getProcessDetails();
-    }, [id]);
+        checkWalletConnection();
+    }, []);
+
+    useEffect(() => {
+        if (isWalletConnected) {
+            getProcessDetails();
+        }
+    }, [id, isWalletConnected]);
+
+    const checkWalletConnection = async () => {
+        if (window.arweaveWallet) {
+            try {
+                const activeWallet = await window.arweaveWallet.getActiveAddress();
+                if (activeWallet) {
+                    setIsWalletConnected(true);
+                } else {
+                    setIsWalletConnected(false);
+                }
+            } catch (error) {
+                console.error("Error checking wallet connection:", error);
+                setIsWalletConnected(false);
+            }
+        } else {
+            setIsWalletConnected(false);
+        }
+        setLoading(false);
+    };
 
     const getProcessDetails = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`http://localhost:3000/getMessages/${id}`);
             const edges = response.data.data.transactions.edges;
             setProcessEdges(edges);
-            console.log(edges);
             const allTags = edges.flatMap(edge => edge.node.tags);
             setDonutChartData(createDonutChartData(allTags));
         } catch (error) {
             console.error("Error fetching process details:", error);
         }
+        setLoading(false);
     };
 
     const createDonutChartData = (tags) => {
-        const labels= tags.map(tag => tag.name);
+        const labels = tags.map(tag => tag.name);
         const data = tags.map(tag => parseInt(tag.value, 10) || 0);
         return {
             labels,
@@ -55,6 +84,25 @@ const MonitorDetail = () => {
             ],
         };
     };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32 mb-4"></div>
+            </div>
+        );
+    }
+
+    if (!isWalletConnected) {
+        return (
+            <>
+                <Navbar />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <p className="text-center text-red-500">Please connect your wallet to view this page.</p>
+                </div>
+            </>
+        );
+    }
 
     return (
         <>
@@ -87,7 +135,7 @@ const MonitorDetail = () => {
                         </div>
                     </>
                 ) : (
-                    <p>Loading process details...</p>
+                    <p>No process details found.</p>
                 )}
             </div>
         </>
