@@ -2,10 +2,11 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 const port = 3000;
+const cors = require('cors');
 const gql = require('graphql-tag');
 const { print } = require('graphql');
 app.use(express.json());
-
+app.use(cors());
 app.post('/getInfo', async (req, res) => {
     console.log(req.body);
     const { processid } = req.body;
