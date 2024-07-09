@@ -17,7 +17,7 @@ app.post('/getInfo', async (req, res) => {
   const { processid } = req.body;
   try {
     const response = await axios.post(
-      `https://cu73.ao-testnet.xyz/dry-run?process-id=${processid}`,
+      `https://cu32.ao-testnet.xyz/dry-run?process-id=${processid}`,
       {
         Owner: '123456789',
         Target: processid,
@@ -212,76 +212,13 @@ app.get('/getOwner/:msgid', async (req, res) => {
     res.status(500).send('Error making the request');
   }
 });
-
-
 app.post('/getResults', async (req, res) => {
   const { processId, messageIds } = req.body;
   let results = [];
 
   for (let i = 0; i < messageIds.length; i++) {
     try {
-      const response = await axios.get(
-        `https://cu72.ao-testnet.xyz/result/${messageIds[i]}?process-id=${processId}`,
-        {
-          headers: {
-            'accept': 'application/json',
-            'accept-language': 'en-US,en;q=0.9',
-            'origin': 'null',
-            'priority': 'u=1, i',
-            'referer': 'https://www.ao.link/',
-            'sec-ch-ua': '"Opera";v="111", "Chromium";v="125", "Not.A/Brand";v="24"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'cross-site',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 OPR/111.0.0.0'
-          }
-        }
-      );
-
-      let dataValue;
-      try {
-        const outputData = response.data.Output.data;
-        dataValue = outputData.match(/Data = (.*)/)[1];
-      } catch (parseError) {
-        dataValue = response.data;
-      }
-
-      results.push({ messageId: messageIds[i], dataValue });
-
-      // Wait for a specified interval before sending the next request
-      if (i < messageIds.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 2000)); // 2000 ms interval
-      }
-    } catch (error) {
-      console.error(`Error making the request for messageId ${messageIds[i]}:`, error);
-      results.push({ messageId: messageIds[i], error: 'Error making the request' });
-    }
-  }
-
-  res.json({ results });
-});
-app.post('/getMessageDataWithOwner/bulk', async (req, res) => {
-  const { messageIds, processId } = req.body;
-  
-
-  try {
-    const results = [];
-
-    for (let i = 0; i < messageIds.length; i++) {
-      const messageId = messageIds[i];
-      // const url = urls[i % urls.length]; // Cycle through the URLs
-
-      // console.log("Getting message data for messageId:", messageId, "using URL:", url);
-
-      // Fetch message data from local endpoint
-      const messageResponse = await axios.post('http://localhost:3000/getResult', { messageId, processId });
-
-      const outputData = messageResponse.data;
-
-      // Fetch owner information from Arweave
-      const ownerResponse = await axios.post(
+      const response = await axios.post(
         'https://arweave-search.goldsky.com/graphql',
         {
           query: `query ($id: ID!) {
@@ -324,7 +261,7 @@ app.post('/getMessageDataWithOwner/bulk', async (req, res) => {
           }
           `,
           variables: {
-            id: messageId
+            id: messageIds[i]
           }
         },
         {
@@ -346,14 +283,94 @@ app.post('/getMessageDataWithOwner/bulk', async (req, res) => {
         }
       );
 
-      const transactionNode = ownerResponse.data.data.transactions.edges[0]?.node;
-      const ownerAddress = transactionNode?.owner?.address;
-      const tags = transactionNode?.tags.map(tag => ({ name: tag.name, value: tag.value }));
+      const outputData = response.data;
+      results.push({ messageId: messageIds[i], dataValue: outputData });
 
-      results.push({ messageData: outputData, owner: ownerAddress, tags: tags });
+      // Wait for a specified interval before sending the next request
+      if (i < messageIds.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // 2000 ms interval
+      }
+    } catch (error) {
+      console.error(`Error making the request for messageId ${messageIds[i]}:`, error);
+      results.push({ messageId: messageIds[i], error: 'Error making the request' });
     }
+  }
 
-    res.json({ results });
+  res.json({ results });
+});
+
+app.get('/getResult/:msgid', async (req, res) => {
+  const msgid = req.params.msgid;
+  
+  try {
+    const response = await axios.post(
+      'https://arweave-search.goldsky.com/graphql',
+      {
+        query: `query ($id: ID!) {
+          transactions(ids: [$id]) {
+            ...MessageFields
+            __typename
+          }
+        }
+
+        fragment MessageFields on TransactionConnection {
+          edges {
+            cursor
+            node {
+              id
+              recipient
+              block {
+                timestamp
+                height
+                __typename
+              }
+              ingested_at
+              tags {
+                name
+                value
+                __typename
+              }
+              data {
+                size
+                __typename
+              }
+              owner {
+                address
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        `,
+        variables: {
+          id: msgid
+        }
+      },
+      {
+        headers: {
+          'accept': 'application/graphql-response+json, application/graphql+json, application/json, text/event-stream, multipart/mixed',
+          'accept-language': 'en-US,en;q=0.9',
+          'content-type': 'application/json',
+          'origin': 'https://www.ao.link',
+          'priority': 'u=1, i',
+          'referer': 'https://www.ao.link/',
+          'sec-ch-ua': '"Opera";v="111", "Chromium";v="125", "Not.A/Brand";v="24"',
+          'sec-ch-ua-mobile': '?0',
+          'sec-ch-ua-platform': '"Windows"',
+          'sec-fetch-dest': 'empty',
+          'sec-fetch-mode': 'cors',
+          'sec-fetch-site': 'cross-site',
+          'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 OPR/111.0.0.0'
+        }
+      }
+    );
+    const outputData = response.data
+    // const dataValue = outputData.match(/Data = (.*)/)[1];
+
+    res.json({ dataValue:outputData });
   } catch (error) {
     console.error(error);
     res.status(500).send('Error making the request');
