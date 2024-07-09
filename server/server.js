@@ -49,8 +49,10 @@ app.post('/getInfo', async (req, res) => {
     }
 });
 
-app.get('/getMessages', async (req, res) => {
-    try {
+app.get('/getMessages/:entity', async (req, res) => {
+  const entity=req.params.entity;
+  try {
+      
         const response = await axios.post(
             'https://arweave-search.goldsky.com/graphql',
             {
@@ -99,7 +101,7 @@ app.get('/getMessages', async (req, res) => {
                         }`,
                 variables: {
                     cursor: "",
-                    entityId: "3EjFiL4p_hCDAjtu2H9xaOXthsKHL-S_XgOCfOo2Z10",
+                    entityId: entity,
                     limit: 25,
                     sortOrder: "HEIGHT_DESC"
                 }
