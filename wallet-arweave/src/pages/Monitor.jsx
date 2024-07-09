@@ -1,29 +1,32 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import { ArConnect } from 'arweavekit/auth'
 import axios from "axios";
 
 const MonitorPage = () => {
-    const[processes, setProcesses] = useState([]);
-    useEffect(()=>{
-        // GetWallet();
+    const [processes, setProcesses] = useState([]);
+
+    useEffect(() => {
         getProcesses();
-    },[])
+    }, []);
+
     const getProcesses = async () => {
-        if (!window.arweaveWallet) return
+        if (!window.arweaveWallet) return;
         const activeWallet = await window.arweaveWallet.getActiveAddress();
-        const response=axios.post('http://localhost:3000/getTransactions', {
-            data:{
+        try {
+            const response = await axios.post('http://localhost:3000/getTransactions', {
                 address: activeWallet
-            }
-        })
-        // setProcesses(response.data)
-        console.log(response.data)
-    }
+            });
+            const nodes = response.data.data.transactions.edges.map(edge => edge.node);
+            setProcesses(nodes);
+            console.log(nodes);
+        } catch (error) {
+            console.error("Error fetching processes:", error);
+        }
+    };
+
     return (
         <>
             <Navbar />
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="flex justify-center items-center mb-4">
                     <div className="relative mt-5">
@@ -34,13 +37,32 @@ const MonitorPage = () => {
                         </span>
                         <input
                             type="text"
-                            className="block w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent "
+                            className="block w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Search Process"
                         />
                     </div>
                 </div>
-
-
+                {processes.length > 0 ? (
+                    <ul>
+                        {processes.map((process) => (
+                            <li key={process.id} className="mb-4">
+                                <div className="border rounded p-4">
+                                    <p><strong>ID:</strong> {process.id}</p>
+                                    <p><strong>Tags:</strong></p>
+                                    <ul>
+                                        {process.tags.map((tag, index) => (
+                                            <li key={index} className="ml-4">
+                                                <strong>{tag.name}:</strong> {tag.value}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>No processes found.</p>
+                )}
             </div>
         </>
     );
