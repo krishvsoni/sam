@@ -1,7 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import { ArConnect } from 'arweavekit/auth'
+import axios from "axios";
 
 const MonitorPage = () => {
+    const[processes, setProcesses] = useState([]);
+    useEffect(()=>{
+        // GetWallet();
+        getProcesses();
+    },[])
+    const getProcesses = async () => {
+        if (!window.arweaveWallet) return
+        const activeWallet = await window.arweaveWallet.getActiveAddress();
+        const response=axios.post('http://localhost:3000/getTransactions', {
+            data:{
+                address: activeWallet
+            }
+        })
+        // setProcesses(response.data)
+        console.log(response.data)
+    }
     return (
         <>
             <Navbar />
@@ -22,7 +40,7 @@ const MonitorPage = () => {
                     </div>
                 </div>
 
-               
+
             </div>
         </>
     );
