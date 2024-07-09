@@ -13,7 +13,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/monitor" element={<Monitor />} />
           <Route path="/monitor/:id" element={<MonitorDetail />} />
-        </Routes>
+          </Routes>
       </Router>
     </ArweaveWalletKit>
   );

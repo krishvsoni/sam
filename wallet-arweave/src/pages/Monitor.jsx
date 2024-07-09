@@ -1,9 +1,11 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import axios from "axios";
 
 const MonitorPage = () => {
     const [processes, setProcesses] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         getProcesses();
@@ -56,6 +58,12 @@ const MonitorPage = () => {
                                             </li>
                                         ))}
                                     </ul>
+                                    <button
+                                        onClick={() => navigate(`/monitor/${process.id}`)}
+                                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                                    >
+                                        View Details
+                                    </button>
                                 </div>
                             </li>
                         ))}
