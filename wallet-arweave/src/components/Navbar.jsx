@@ -9,7 +9,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-base-100 shadow-lg">
+    <nav className="bg-base-100 shadow-lg font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -33,15 +33,15 @@ const Navbar = () => {
                 </svg>
               </button>
               {isOpen && (
-                <div className="origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-base-100 ring-1 ring-black ring-opacity-5">
+                <div className="origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-base-100 ring-1 ring-black ring-opacity-5 font-sans">
                   <div className="py-1">
-                    <button className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                    <button className="block px-4 py-2 text-sm text-white hover:bg-white hover:text-black w-full text-left">
                       Dropdown Item 1
                     </button>
-                    <button className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                    <button className="block px-4 py-2 text-sm text-white hover:bg-white hover:text-black w-full text-left">
                       Dropdown Item 2
                     </button>
-                    <button className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                    <button className="block px-4 py-2 text-sm text-white hover:bg-white hover:text-black w-full text-left">
                       Dropdown Item 3
                     </button>
                   </div>
