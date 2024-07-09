@@ -6,6 +6,7 @@ import axios from "axios";
 const MonitorPage = () => {
     const [processes, setProcesses] = useState([]);
     const [expandedProcessId, setExpandedProcessId] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -35,9 +36,14 @@ const MonitorPage = () => {
         }
     };
 
+    const filteredProcesses = processes.filter((process) => {
+        const processString = JSON.stringify(process).toLowerCase();
+        return processString.includes(searchQuery.toLowerCase());
+    });
+
     return (
         <>
-            <Navbar />
+            {/* <Navbar /> */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="mb-4">
                     <h2 className="text-2xl font-bold mb-2 text-center">Your Processes</h2>
@@ -51,12 +57,14 @@ const MonitorPage = () => {
                             type="text"
                             className="block w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Search Process"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
                 </div>
-                {processes.length > 0 ? (
+                {filteredProcesses.length > 0 ? (
                     <ul>
-                        {processes.map((process) => (
+                        {filteredProcesses.map((process) => (
                             <li key={process.id} className="mb-4">
                                 <div className="border rounded p-4 hover:bg-gray-800 transition duration-200">
                                     <div className="flex justify-between items-center">

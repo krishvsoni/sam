@@ -96,7 +96,7 @@ const MonitorDetail = () => {
     if (!isWalletConnected) {
         return (
             <>
-                <Navbar />
+                {/* <Navbar /> */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <p className="text-center text-red-500">Please connect your wallet to view this page.</p>
                 </div>
@@ -106,7 +106,7 @@ const MonitorDetail = () => {
 
     return (
         <>
-            <Navbar />
+            {/* <Navbar /> */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 {processEdges.length > 0 ? (
                     <>
