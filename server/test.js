@@ -1,6 +1,5 @@
 const { createDataItemSigner, spawn } = require('@permaweb/aoconnect');
 const fs = require('fs');
-// const { createDataItemSigner, spawn } = require('@permaweb/aoconnect');
 const wallet = JSON.parse(fs.readFileSync('./wallet.json', 'utf8'));
 
 async function getProcessId() {
