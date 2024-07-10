@@ -1,15 +1,17 @@
 import express from 'express';
-// const axios = require('axios');
 import axios from 'axios';
-// const cors = require('cors');
+import mongoose from 'mongoose';
 import cors from 'cors';
 import gql from 'graphql-tag';
 import { print } from 'graphql';
+import cron from "node-cron";
+import Process from './model.js';
+import nodemailer from 'nodemailer'
+import connectToDB from './mongo.js';
 import { spawn } from '@permaweb/aoconnect';
 const app = express();
 const port = 3000;
-// const gql = require('graphql-tag');
-// const { print } = require('graphql');
+
 app.use(express.json());
 app.use(cors());
 app.post('/getInfo', async (req, res) => {
@@ -129,8 +131,14 @@ app.get('/getMessages/:entity', async (req, res) => {
         }
       }
     );
+    const filteredData = response.data.data.transactions.edges.map(edge => ({
+      id: edge.node.id,
+      tags: edge.node.tags,
+      ownerAddress: edge.node.owner.address
+    }));
+    // const out=response.data
 
-    res.json(response.data);
+    res.json({filteredData});
   } catch (error) {
     console.error(error);
     res.status(500).send('Error making the request');
@@ -138,7 +146,7 @@ app.get('/getMessages/:entity', async (req, res) => {
 });
 app.get('/getOwner/:msgid', async (req, res) => {
   const msgid = req.params.msgid;
-  
+
   try {
     const response = await axios.post(
       'https://arweave-search.goldsky.com/graphql',
@@ -301,7 +309,7 @@ app.post('/getResults', async (req, res) => {
 
 app.get('/getResult/:msgid', async (req, res) => {
   const msgid = req.params.msgid;
-  
+
   try {
     const response = await axios.post(
       'https://arweave-search.goldsky.com/graphql',
@@ -370,14 +378,14 @@ app.get('/getResult/:msgid', async (req, res) => {
     const outputData = response.data
     // const dataValue = outputData.match(/Data = (.*)/)[1];
 
-    res.json({ dataValue:outputData });
+    res.json({ dataValue: outputData });
   } catch (error) {
     console.error(error);
     res.status(500).send('Error making the request');
   }
 });
 
-app.post('/getTransactions', async (req, res) => {
+app.post('/getProcesses', async (req, res) => {
   const { address } = req.body;
 
   // Construct the GraphQL query
@@ -432,20 +440,130 @@ app.post('/getTransactions', async (req, res) => {
     res.status(500).send('Error making the request');
   }
 });
-app.get('/spawnCron', async (req, res) => {
-  const spawnId = await spawn({
+app.post('/setupCRON', async (req, res) => {
+  await connectToDB();
+  const { entity, interval } = req.body; // expecting entity and interval in request body
 
-    module: "nI_jcZgPd0rcsnjaHtaaJPpMCW847ou-3RGA5_W3aZg",
-    scheduler: "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA",
-    signer: createDataItemSigner(wallet),
-    tags: [{ name: "Cron-Interval", value: "30-seconds" }, {
-      value: "Cron",
-      name: "Cron-Tag-Action"
-    }],
+  try {
+    // Function to fetch messages and store them in the database
+    const fetchAndStoreMessages = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/getMessages/${entity}`);
+        const messages = response.data;
 
+        // Extract message IDs and tags from the fetched messages
+        const messagesWithTags = messages.map(msg => ({
+          messageId: msg.id,
+          tags: msg.tags.map(tag => tag.value)
+        }));
 
-  })
-})
+        // Find or create a process document based on entity (processId)
+        const process = await Process.findOneAndUpdate(
+          { processId: entity },
+          {
+            $set: {
+              messagesWithTags: messagesWithTags
+            }
+          },
+          { upsert: true, new: true }
+        );
+
+        console.log(`Messages stored for entity: ${entity}`);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    // Fetch and store messages immediately upon setup
+    await fetchAndStoreMessages();
+
+    // Set up CRON job to run at specified intervals
+    cron.schedule(interval, fetchAndStoreMessages);
+
+    res.status(200).send(`CRON job setup to fetch messages for entity: ${entity} at interval: ${interval}`);
+  } catch (error) {
+    console.error('Error setting up CRON job:', error);
+    res.status(500).send('Error setting up CRON job');
+  }
+});
+export const generateHTMLReport = (process) => {
+  const messages = process.messagesWithTags;
+  let htmlContent = `
+      <html>
+      <head>
+          <title>CRON Job Report</title>
+      </head>
+      <body>
+          <h1>Report for Process ID: ${process.processId}</h1>
+          <ul>
+  `;
+
+  messages.forEach(msg => {
+      htmlContent += `
+          <li>
+              <strong>Message ID:</strong> ${msg.messageId} <br>
+              <strong>Tags:</strong> ${msg.tags.join(', ')}
+          </li>
+      `;
+  });
+
+  htmlContent += `
+          </ul>
+      </body>
+      </html>
+  `;
+
+  return htmlContent;
+};
+export const sendEmailReport = async (htmlReport) => {
+  const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+          user: 'haardsolanki.itm@gmail.com',
+          pass: 'oupl qleh qnee pucl'
+      },
+  });
+
+  const mailOptions = {
+      from: 'SAM ONCHAIN <haardsolanki.itm@gmail.com>',
+      to: 'haard.solanki2525@gmail.com', // Update with recipient's email
+      subject: 'CRON Job Report',
+      html: htmlReport
+  };
+
+  try {
+      await transporter.sendMail(mailOptions);
+      console.log('Email sent with CRON job report');
+  } catch (error) {
+      console.error('Error sending email:', error);
+  }
+};
+app.get('/getCRONreport/:processId', async (req, res) => {
+  await connectToDB();
+
+  const pid = req.params.processId;
+  console.log(pid);
+  try {
+      const process = await Process.findOne({ processId: pid });
+      if (process) {
+          // Generate HTML report
+          const htmlReport = generateHTMLReport(process);
+
+          // Send email with HTML report
+          await sendEmailReport(htmlReport);
+
+          res.status(200).send('Report generated and email sent');
+      } else {
+          res.status(404).send('Process not found');
+      }
+  } catch (error) {
+      console.error('ERROR:', error);
+      res.status(500).send('Internal server error');
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
