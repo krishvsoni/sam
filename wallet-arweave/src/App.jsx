@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Monitor from "./pages/Monitor";
 import MonitorDetail from "./pages/MonitorDetail";
 import Navbar from "./components/Navbar";
+import Analyzer from "./pages/Analyzer";
 
 const App = () => {
   return (
@@ -16,6 +17,9 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/monitor" element={<Monitor />} />
           <Route path="/monitor/:id" element={<MonitorDetail />} />
+          <Route path="/analyze/:id" element={<Analyzer />} />
+
+          
           </Routes>
       </Router>
     </ArweaveWalletKit>

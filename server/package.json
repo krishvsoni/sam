@@ -6,6 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
+  "type": "module",
   "author": "",
   "license": "ISC",
   "description": "",
@@ -15,6 +16,9 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "gql": "^1.1.2",
-    "graphql-tag": "^2.12.6"
+    "graphql-tag": "^2.12.6",
+    "mongoose": "^8.5.0",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.14"
   }
 }

@@ -1,145 +1,164 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+ import React, {useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
-import { Doughnut } from 'react-chartjs-2';
-import 'chart.js/auto';
 
 const MonitorDetail = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const [processEdges, setProcessEdges] = useState([]);
-    const [donutChartData, setDonutChartData] = useState({});
-    const [isWalletConnected, setIsWalletConnected] = useState(false);
-    const [loading, setLoading] = useState(true);
+  const { id } = useParams();
+  const [processEdges, setProcessEdges] = useState([]);
+  const [allTags, setAllTags] = useState([]);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [tagFilter, setTagFilter] = useState("");
 
-    useEffect(() => {
-        checkWalletConnection();
-    }, []);
+  const backgroundImages = [
+    "/images/image1.jpg",
+    "/images/image2.jpg",
+    "/images/image3.jpg",
+    "/images/image4.jpg" 
+  ];
 
-    useEffect(() => {
-        if (isWalletConnected) {
-            getProcessDetails();
-        }
-    }, [id, isWalletConnected]);
+  useEffect(() => {
+    checkWalletConnection();
+  }, []);
 
-    const checkWalletConnection = async () => {
-        if (window.arweaveWallet) {
-            try {
-                const activeWallet = await window.arweaveWallet.getActiveAddress();
-                if (activeWallet) {
-                    setIsWalletConnected(true);
-                } else {
-                    setIsWalletConnected(false);
-                }
-            } catch (error) {
-                console.error("Error checking wallet connection:", error);
-                setIsWalletConnected(false);
-            }
-        } else {
-            setIsWalletConnected(false);
-        }
-        setLoading(false);
-    };
-
-    const getProcessDetails = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(`http://localhost:3000/getMessages/${id}`);
-            const edges = response.data.data.transactions.edges;
-            setProcessEdges(edges);
-            const allTags = edges.flatMap(edge => edge.node.tags);
-            setDonutChartData(createDonutChartData(allTags));
-        } catch (error) {
-            console.error("Error fetching process details:", error);
-        }
-        setLoading(false);
-    };
-
-    const createDonutChartData = (tags) => {
-        const labels = tags.map(tag => tag.name);
-        const data = tags.map(tag => parseInt(tag.value, 10) || 0);
-        return {
-            labels,
-            datasets: [
-                {
-                    data,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.6)',
-                        'rgba(54, 162, 235, 0.6)',
-                        'rgba(255, 206, 86, 0.6)',
-                        'rgba(75, 192, 192, 0.6)',
-                        'rgba(153, 102, 255, 0.6)',
-                        'rgba(255, 159, 64, 0.6)',
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)',
-                    ],
-                },
-            ],
-        };
-    };
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32 mb-4"></div>
-            </div>
-        );
+  useEffect(() => {
+    if (isWalletConnected) {
+      getProcessDetails();
     }
+  }, [id, isWalletConnected]);
 
-    if (!isWalletConnected) {
-        return (
-            <>
-                {/* <Navbar /> */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <p className="text-center text-red-500">Please connect your wallet to view this page.</p>
-                </div>
-            </>
-        );
+  const checkWalletConnection = async () => {
+    if (window.arweaveWallet) {
+      try {
+        const activeWallet = await window.arweaveWallet.getActiveAddress();
+        setIsWalletConnected(!!activeWallet);
+      } catch (error) {
+        console.error("Error checking wallet connection:", error);
+        setIsWalletConnected(false);
+      }
+    } else {
+      setIsWalletConnected(false);
     }
+    setLoading(false);
+  };
 
+  const getProcessDetails = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:3000/getMessages/${id}`);
+      const edges = response.data.filteredData; // Update this line
+      setProcessEdges(edges);
+      const tags = edges.flatMap((edge) => edge.tags);
+      setAllTags(groupTags(tags));
+    } catch (error) {
+      console.error("Error fetching process details:", error);
+    }
+    setLoading(false);
+  };
+
+  const groupTags = (tags) => {
+    const tagMap = new Map();
+    tags.forEach((tag) => {
+      const tagName = tag.name;
+      if (tagMap.has(tagName)) {
+        tagMap.set(tagName, tagMap.get(tagName) + 1);
+      } else {
+        tagMap.set(tagName, 1);
+      }
+    });
+
+    return Array.from(tagMap.entries()).map(([name, value]) => ({ name, value }));
+  };
+
+  const filteredProcessEdges = processEdges.filter((edge) =>
+    edge.tags.some(
+      (tag) =>
+        tag.value.toLowerCase().includes(tagFilter.toLowerCase()) ||
+        tag.name.toLowerCase().includes(tagFilter.toLowerCase())
+    )
+  );
+
+  const filteredTags = allTags.filter((tag) =>
+    tag.name.toLowerCase().includes(tagFilter.toLowerCase()) ||
+    tag.value.toString().toLowerCase().includes(tagFilter.toLowerCase())
+  );
+
+  if (loading) {
     return (
-        <>
-            {/* <Navbar /> */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                {processEdges.length > 0 ? (
-                    <>
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                            {processEdges.map((edge, index) => (
-                                <div key={index} className="border rounded p-4 mb-4 break-words">
-                                    <div>
-                                        <p className="truncate"><strong>ID:</strong> {edge.node.id}</p>
-                                        <p className="truncate"><strong>Recipient:</strong> {edge.node.recipient}</p>
-                                        <p className="text-wrap"><strong>Tags:</strong></p>
-                                        <ul>
-                                            {edge.node.tags.map((tag, tagIndex) => (
-                                                <li key={tagIndex} className="ml-4 truncate">
-                                                    <strong>{tag.name}:</strong> {tag.value}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                        <p className="truncate"><strong>Data Size:</strong> {edge.node.data.size}</p>
-                                        <p className="truncate"><strong>Owner:</strong> {edge.node.owner.address}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="mt-8">
-                            <Doughnut data={donutChartData} />
-                        </div>
-                    </>
-                ) : (
-                    <p>No process details found.</p>
-                )}
-            </div>
-        </>
+      <div className="flex justify-center items-center h-screen">
+        <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-16 w-16 mb-4"></div>
+      </div>
     );
+  }
+
+  if (!isWalletConnected) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <p className="text-center text-red-500">Please connect your wallet to view this page.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 font-mono">
+      <h1 className="text-3xl font-bold mb-6">Process Block Messages</h1>
+      <div className="mb-6">
+
+        <input
+          type="text"
+          id="tagFilter"
+          name="tagFilter"
+          value={tagFilter}
+          onChange={(e) => setTagFilter(e.target.value)}
+          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+          placeholder="Enter tag value to filter"
+        />
+      </div>
+      {filteredProcessEdges.length > 0? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredProcessEdges.map((edge, index) => (
+            <div
+              key={index}
+              className="relative rounded-lg shadow-md overflow-hidden"
+            >
+              <div
+                className="absolute inset-0 bg-cover bg-center blur"
+                style={{
+                  backgroundImage: `url(${backgroundImages[index % backgroundImages.length]})`
+                }}
+              ></div>
+              <div className="absolute inset-0 bg-black opacity-30"></div>
+              <div className="relative p-6 text-white">
+                <p className="truncate"><strong>ID:</strong> {edge.id}</p>
+                <p className="truncate"><strong>Owner Address:</strong> {edge.ownerAddress}</p>
+                <p className="text-wrap"><strong>Tags:</strong></p>
+                <ul>
+                  {edge.tags.map((tag, tagIndex) => (
+                    <li key={tagIndex} className="ml-4">
+                      <strong>{tag.name}:</strong> {tag.value}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+       !loading && <p className="text-center text-gray-500">No processes found matching the filter criteria.</p>
+      )}
+      <div className="mt-8">
+        <h2 className="text-xl font-bold mb-4">Tag Values</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-black">
+          {filteredTags.map((tag, index) => (
+            <div key={index} className="bg-white rounded-lg shadow-md p-6">
+              <p className="font-bold">{tag.name}</p>
+              <p>{tag.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default MonitorDetail;

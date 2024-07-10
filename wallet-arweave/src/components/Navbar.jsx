@@ -81,7 +81,6 @@ const Navbar = () => {
           </div>
           <div className="flex-1">
             <div className="max-w-9xl mx-auto px-6 sm:px-10 lg:px-10">
-              {/* Main content area */}
             </div>
           </div>
         </div>
