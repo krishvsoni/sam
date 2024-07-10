@@ -28,7 +28,7 @@ const MonitorPage = () => {
     };
 
     const setupWebSocket = () => {
-        const socket = new WebSocket("ws://localhost:3000");
+        const socket = new WebSocket("ws://sam-backend-yf1o.onrender.com/ws/");
 
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
