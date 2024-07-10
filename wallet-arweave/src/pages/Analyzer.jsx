@@ -1,13 +1,14 @@
 import AnalyzerForm from "../components/AnalyzerForm";
-
+import Navbar from "../components/Navbar"
 const Analyzer = () => {
-    return(
-      <>
-      <AnalyzerForm/>
-      
-      </>
+  return (
+    <>
+      <Navbar/>
+      <AnalyzerForm />
 
-    );
+    </>
+
+  );
 }
 
 export default Analyzer;

@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { LampDemo } from '../components/Lamp';
 import Navbar from '../components/Navbar';
+
 
 const Home = () => {
   const navigate = useNavigate();
@@ -14,11 +16,8 @@ const Home = () => {
 
   return (
     <>
-      {/* <Navbar /> */}
-      <div className="container mx-auto p-4">
-        <h1 className="text-4xl font-bold text-center">Monitor Analysis Audit</h1>
-        <p className="mt-4 text-lg"></p>
-      </div>
+     <Navbar/>
+      <LampDemo/>
     </>
   );
 };

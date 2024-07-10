@@ -491,30 +491,44 @@ app.post('/setupCRON', async (req, res) => {
     res.status(500).send('Error setting up CRON job');
   }
 });
-
 export const generateHTMLReport = (process) => {
   const messages = process.messagesWithTags;
   let htmlContent = `
       <html>
       <head>
           <title>CRON Job Report</title>
+          <style>
+              /* Include Tailwind CSS (example classes) */
+              @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
+          </style>
       </head>
-      <body>
-          <h1>Report for Process ID: ${process.processId}</h1>
-          <ul>
+      <body class="bg-gray-100 p-6">
+          <div class="max-w-4xl mx-auto">
+              <h1 class="text-2xl font-bold mb-4">Report for Process ID: ${process.processId}</h1>
+              <img src="server/logo (1).png" class="absolute top-0 right-0 w-16 h-16" alt="Logo">
+              <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-100">
+                      <tr>
+                          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message ID</th>
+                          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tags</th>
+                      </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
   `;
 
   messages.forEach(msg => {
       htmlContent += `
-          <li>
-              <strong>Message ID:</strong> ${msg.messageId} <br>
-              <strong>Tags:</strong> ${msg.tags.join(', ')}
-          </li>
+                      <tr>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${msg.messageId}</td>
+                          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${msg.tags.join(', ')}</td>
+                      </tr>
       `;
   });
 
   htmlContent += `
-          </ul>
+                  </tbody>
+              </table>
+          </div>
       </body>
       </html>
   `;
