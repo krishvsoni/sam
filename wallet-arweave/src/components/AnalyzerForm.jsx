@@ -9,7 +9,7 @@ export function AnalyzerForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/setupCRON', {
+      const response = await axios.post('https://sam-backend-yf1o.onrender.com/setupCRON', {
         entity,
         interval
       });

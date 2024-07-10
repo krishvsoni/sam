@@ -19,7 +19,7 @@ const MonitorPage = () => {
         if (!window.arweaveWallet) return;
         const activeWallet = await window.arweaveWallet.getActiveAddress();
         try {
-            const response = await axios.post('http://localhost:3000/getProcesses', {
+            const response = await axios.post('https://sam-backend-yf1o.onrender.com/getProcesses', {
                 address: activeWallet
             });
             const nodes = response.data.data.transactions.edges.map(edge => edge.node);

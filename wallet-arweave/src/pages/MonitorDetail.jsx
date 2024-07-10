@@ -45,7 +45,7 @@ const MonitorDetail = () => {
   const getProcessDetails = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:3000/getMessages/${id}`);
+      const response = await axios.get(`https://sam-backend-yf1o.onrender.com/getMessages/${id}`);
       const edges = response.data.filteredData; // Update this line
       setProcessEdges(edges);
       const tags = edges.flatMap((edge) => edge.tags);
