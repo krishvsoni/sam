@@ -540,29 +540,49 @@ export const sendEmailReport = async (htmlReport) => {
       console.error('Error sending email:', error);
   }
 };
-app.get('/getCRONreport/:processId', async (req, res) => {
-  await connectToDB();
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const pid = req.params.processId;
-  console.log(pid);
-  try {
-      const process = await Process.findOne({ processId: pid });
-      if (process) {
-          // Generate HTML report
-          const htmlReport = generateHTMLReport(process);
+const processAndSendReport = async (processId) => {
+    try {
+        const process = await Process.findOne({ processId: processId });
+        if (process) {
+            // Generate HTML report
+            const htmlReport = generateHTMLReport(process);
 
-          // Send email with HTML report
-          await sendEmailReport(htmlReport);
+            // Send email with HTML report
+            await sendEmailReport(htmlReport);
 
-          res.status(200).send('Report generated and email sent');
-      } else {
-          res.status(404).send('Process not found');
-      }
-  } catch (error) {
-      console.error('ERROR:', error);
-      res.status(500).send('Internal server error');
-  }
+            console.log('Report generated and email sent');
+        } else {
+            console.log('Process not found');
+        }
+    } catch (error) {
+        console.error('ERROR:', error);
+    }
+};
+
+const startRecurringTask = async (processId, delayMs) => {
+    await connectToDB();
+
+    const executeTask = async () => {
+        await processAndSendReport(processId);
+        setTimeout(executeTask, delayMs);
+    };
+
+    executeTask();
+};
+
+app.get('/getreport', (req, res) => {
+    const { processId, delayTime } = req.query;
+    console.log(`Process ID: ${processId}, Delay Time: ${delayTime} seconds`);
+
+    const delayMs = parseInt(delayTime) * 1000;
+
+    startRecurringTask(processId, delayMs);
+
+    res.status(200).send(`Recurring task started for process ID: ${processId} with interval: ${delayTime} seconds`);
 });
+
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
