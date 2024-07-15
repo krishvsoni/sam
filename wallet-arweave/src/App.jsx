@@ -6,6 +6,7 @@ import Monitor from "./pages/Monitor";
 import MonitorDetail from "./pages/MonitorDetail";
 // import Navbar from "./components/Navbar";
 import Analyzer from "./pages/Analyzer";
+import Offchain from "./pages/Offchain";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="/monitor" element={<Monitor />} />
           <Route path="/monitor/:id" element={<MonitorDetail />} />
           <Route path="/analyze/:id" element={<Analyzer />} />
+          <Route path="/offchain" element={<Offchain />} />
 
           
           </Routes>
