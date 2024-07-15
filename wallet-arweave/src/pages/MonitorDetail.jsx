@@ -1,4 +1,4 @@
- import React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
@@ -14,7 +14,7 @@ const MonitorDetail = () => {
     "/images/image1.jpg",
     "/images/image2.jpg",
     "/images/image3.jpg",
-    "/images/image4.jpg" 
+    "/images/image4.jpg"
   ];
 
   useEffect(() => {
@@ -45,10 +45,10 @@ const MonitorDetail = () => {
   const getProcessDetails = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:3000/getMessages/${id}`);
-      const edges = response.data.filteredData; // Update this line
+      const response = await axios.get(`https://sam_backend.haardsolanki-itm.workers.dev/api/process/getMessages/${id}`);
+      const edges = response.data.data.transactions.edges;
       setProcessEdges(edges);
-      const tags = edges.flatMap((edge) => edge.tags);
+      const tags = edges.flatMap((edge) => edge.node.tags);
       setAllTags(groupTags(tags));
     } catch (error) {
       console.error("Error fetching process details:", error);
@@ -71,7 +71,7 @@ const MonitorDetail = () => {
   };
 
   const filteredProcessEdges = processEdges.filter((edge) =>
-    edge.tags.some(
+    edge.node.tags.some(
       (tag) =>
         tag.value.toLowerCase().includes(tagFilter.toLowerCase()) ||
         tag.name.toLowerCase().includes(tagFilter.toLowerCase())
@@ -103,7 +103,6 @@ const MonitorDetail = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 font-mono">
       <h1 className="text-3xl font-bold mb-6">Process Block Messages</h1>
       <div className="mb-6">
-
         <input
           type="text"
           id="tagFilter"
@@ -114,7 +113,7 @@ const MonitorDetail = () => {
           placeholder="Enter tag value to filter"
         />
       </div>
-      {filteredProcessEdges.length > 0? (
+      {filteredProcessEdges.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredProcessEdges.map((edge, index) => (
             <div
@@ -129,11 +128,15 @@ const MonitorDetail = () => {
               ></div>
               <div className="absolute inset-0 bg-black opacity-30"></div>
               <div className="relative p-6 text-white">
-                <p className="truncate"><strong>ID:</strong> {edge.id}</p>
-                <p className="truncate"><strong>Owner Address:</strong> {edge.ownerAddress}</p>
+                <p className="truncate"><strong>ID:</strong> {edge.node.id}</p>
+                <p className="truncate"><strong>Recipient:</strong> {edge.node.recipient}</p>
+                <p className="truncate"><strong>Block Height:</strong> {edge.node.block.height}</p>
+                <p className="truncate"><strong>Timestamp:</strong> {new Date(edge.node.block.timestamp * 1000).toLocaleString()}</p>
+                <p className="truncate"><strong>Ingested At:</strong> {new Date(edge.node.ingested_at * 1000).toLocaleString()}</p>
+                <p className="truncate"><strong>Owner Address:</strong> {edge.node.owner.address}</p>
                 <p className="text-wrap"><strong>Tags:</strong></p>
                 <ul>
-                  {edge.tags.map((tag, tagIndex) => (
+                  {edge.node.tags.map((tag, tagIndex) => (
                     <li key={tagIndex} className="ml-4">
                       <strong>{tag.name}:</strong> {tag.value}
                     </li>
