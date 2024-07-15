@@ -46,7 +46,8 @@ const MonitorDetail = () => {
     setLoading(true);
     try {
       const response = await axios.get(`https://sam_backend.haardsolanki-itm.workers.dev/api/process/getMessages/${id}`);
-      const edges = response.data.data.transactions.edges;
+      const data = response.data.data.data.transactions;
+      const edges = data.edges;
       setProcessEdges(edges);
       const tags = edges.flatMap((edge) => edge.node.tags);
       setAllTags(groupTags(tags));
