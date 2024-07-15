@@ -24,7 +24,26 @@ export const Offchain = () => {
         link:'',
         thumbnail:'images/code.jpg'
     },
-    
+     {
+      title: "sam-pypi",
+      link: "https://pypi.org/project/sam-cli/",
+      thumbnail: "/images/pypi.jpg",
+    },
+    {
+      title: "sam-npm",
+      link: "https://www.npmjs.com/package/sam-cli-npm",
+      thumbnail: "images/npm.jpg",
+    },
+    {
+        title:'report',
+        link:'',
+        thumbnail:'images/report.jpg'
+    },
+    {
+        title: 'code',
+        link:'',
+        thumbnail:'images/code.jpg'
+    }
   ];
 
   return (
