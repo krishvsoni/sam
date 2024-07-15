@@ -48,7 +48,7 @@ export function AnalyzerForm() {
       <h1 className="text-xl mb-4">Setup CRON Job</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="entity" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="entity" className="block text-sm font-medium text-white">
             Entity (Process ID)
           </label>
           <input
@@ -61,7 +61,7 @@ export function AnalyzerForm() {
           />
         </div>
         <div>
-          <label htmlFor="minute" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="minute" className="block text-sm font-medium text-white">
             Minute
           </label>
           <select
@@ -77,7 +77,7 @@ export function AnalyzerForm() {
           </select>
         </div>
         <div>
-          <label htmlFor="hour" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="hour" className="block text-sm font-mediumtext-white">
             Hour
           </label>
           <select
@@ -93,7 +93,7 @@ export function AnalyzerForm() {
           </select>
         </div>
         <div>
-          <label htmlFor="dayOfMonth" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="dayOfMonth" className="block text-sm font-medium text-white">
             Day of Month
           </label>
           <select
@@ -109,7 +109,7 @@ export function AnalyzerForm() {
           </select>
         </div>
         <div>
-          <label htmlFor="month" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="month" className="block text-sm font-medium text-white">
             Month
           </label>
           <select
@@ -125,7 +125,7 @@ export function AnalyzerForm() {
           </select>
         </div>
         <div>
-          <label htmlFor="dayOfWeek" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="dayOfWeek" className="block text-sm font-medium text-white">
             Day of Week
           </label>
           <select
@@ -142,7 +142,7 @@ export function AnalyzerForm() {
         </div>
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          className="bg-blue-500 text-white  px-4 py-2 rounded-md hover:bg-blue-600"
         >
           Set Up CRON Job
         </button>
@@ -163,7 +163,7 @@ export function AnalyzerForm() {
             placeholder="Enter your email"
             required
           />
-          <button  onClick={handlecronmail} className='btn btn-outline w-1/3 '>
+          <button  onClick={handlecronmail} className=' bg-blue-500 btn btn-outline w-1/3 '>
             Get Cron Reports
           </button>
           {messagerep }
