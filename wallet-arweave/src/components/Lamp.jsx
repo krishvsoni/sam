@@ -19,9 +19,9 @@ export function LampDemo() {
                     duration: 0.8,
                     ease: "easeInOut",
                 }}
-                className="mt-8 bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl"
+                className="mt-8 bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-4xl font-mono tracking-tight text-transparent md:text-7xl"
             >
-                You Write We Monitor
+                Code with Confidence
                 <div className="grid grid-cols-2 gap-4 mt-10 tracking-wide">
                     <button onClick={() => handleClick('/offchain')} className="btn btn-outline text-xl">Off-Chain</button>
                     <button onClick={() => handleClick('/monitor')} className="btn btn-outline text-xl">On-Chain</button>

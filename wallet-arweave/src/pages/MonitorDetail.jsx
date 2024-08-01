@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import Navbar from "../components/Navbar";
 
 const MonitorDetail = () => {
   const { id } = useParams();
   const [processEdges, setProcessEdges] = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [isWalletConnected, setIsWalletConnected] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Loading state
   const [tagFilter, setTagFilter] = useState("");
 
   const backgroundImages = [
@@ -87,7 +88,10 @@ const MonitorDetail = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-16 w-16 mb-4"></div>
+        <svg className="animate-spin h-16 w-16 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8l4 4-4 4v-8a8 8 0 00-8-8z"></path>
+        </svg>
       </div>
     );
   }
@@ -101,67 +105,70 @@ const MonitorDetail = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 font-mono">
-      <h1 className="text-3xl font-bold mb-6">Process Block Messages</h1>
-      <div className="mb-6">
-        <input
-          type="text"
-          id="tagFilter"
-          name="tagFilter"
-          value={tagFilter}
-          onChange={(e) => setTagFilter(e.target.value)}
-          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-          placeholder="Enter tag value to filter"
-        />
-      </div>
-      {filteredProcessEdges.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredProcessEdges.map((edge, index) => (
-            <div
-              key={index}
-              className="relative rounded-lg shadow-md overflow-hidden"
-            >
+    <>
+      <Navbar />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 font-mono">
+        <h1 className="text-3xl font-bold mb-6 text-center">Process Block Messages</h1>
+        <div className="mb-6">
+          <input
+            type="text"
+            id="tagFilter"
+            name="tagFilter"
+            value={tagFilter}
+            onChange={(e) => setTagFilter(e.target.value)}
+            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+            placeholder="Enter tag value to filter"
+          />
+        </div>
+        {filteredProcessEdges.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {filteredProcessEdges.map((edge, index) => (
               <div
-                className="absolute inset-0 bg-cover bg-center blur"
-                style={{
-                  backgroundImage: `url(${backgroundImages[index % backgroundImages.length]})`
-                }}
-              ></div>
-              <div className="absolute inset-0 bg-black opacity-30"></div>
-              <div className="relative p-6 text-white">
-                <p className="truncate"><strong>ID:</strong> {edge.node.id}</p>
-                <p className="truncate"><strong>Recipient:</strong> {edge.node.recipient}</p>
-                <p className="truncate"><strong>Block Height:</strong> {edge.node.block.height}</p>
-                <p className="truncate"><strong>Timestamp:</strong> {new Date(edge.node.block.timestamp * 1000).toLocaleString()}</p>
-                <p className="truncate"><strong>Ingested At:</strong> {new Date(edge.node.ingested_at * 1000).toLocaleString()}</p>
-                <p className="truncate"><strong>Owner Address:</strong> {edge.node.owner.address}</p>
-                <p className="text-wrap"><strong>Tags:</strong></p>
-                <ul>
-                  {edge.node.tags.map((tag, tagIndex) => (
-                    <li key={tagIndex} className="ml-4">
-                      <strong>{tag.name}:</strong> {tag.value}
-                    </li>
-                  ))}
-                </ul>
+                key={index}
+                className="relative rounded-lg shadow-md overflow-hidden"
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center blur"
+                  style={{
+                    backgroundImage: `url(${backgroundImages[index % backgroundImages.length]})`
+                  }}
+                ></div>
+                <div className="absolute inset-0 bg-black opacity-30"></div>
+                <div className="relative p-6 text-white">
+                  <p className="truncate"><strong>ID:</strong> {edge.node.id}</p>
+                  <p className="truncate"><strong>Recipient:</strong> {edge.node.recipient}</p>
+                  <p className="truncate"><strong>Block Height:</strong> {edge.node.block.height}</p>
+                  <p className="truncate"><strong>Timestamp:</strong> {new Date(edge.node.block.timestamp * 1000).toLocaleString()}</p>
+                  <p className="truncate"><strong>Ingested At:</strong> {new Date(edge.node.ingested_at * 1000).toLocaleString()}</p>
+                  <p className="truncate"><strong>Owner Address:</strong> {edge.node.owner.address}</p>
+                  <p className="text-wrap"><strong>Tags:</strong></p>
+                  <ul>
+                    {edge.node.tags.map((tag, tagIndex) => (
+                      <li key={tagIndex} className="ml-4">
+                        <strong>{tag.name}:</strong> {tag.value}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-       !loading && <p className="text-center text-gray-500">No processes found matching the filter criteria.</p>
-      )}
-      <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Tag Values</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-black">
-          {filteredTags.map((tag, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-md p-6">
-              <p className="font-bold">{tag.name}</p>
-              <p>{tag.value}</p>
-            </div>
-          ))}
+            ))}
+          </div>
+        ) : (
+         !loading && <p className="text-center text-gray-500">No processes found matching the filter criteria.</p>
+        )}
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4">Tag Values</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-black">
+            {filteredTags.map((tag, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-md p-6">
+                <p className="font-bold">{tag.name}</p>
+                <p>{tag.value}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
