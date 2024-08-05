@@ -52,7 +52,7 @@ const Navbar = () => {
             )}
           </div>
           <div className="flex-1 text-left">
-            <a href="/" className="btn btn-ghost text-2xl font-extrabold" onClick={handleHomeClick}>SAM</a>
+            <a href="/" className="btn btn-ghost text-2xl font-extrabold" onClick={handleHomeClick}>SAM-SUPPORT</a>
           </div>
           <div className="flex items-center ml-auto space-x-4">
             <Wallet />

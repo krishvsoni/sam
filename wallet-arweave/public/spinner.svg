@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" className="animate-spin h-12 w-12 text-blue-500" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" className="opacity-25" strokeWidth="4"/><path fill="currentColor" d="M4 12a8 8 0 018-8v8l4 4-4 4v-8a8 8 0 00-8-8z" className="opacity-75"/></svg>
