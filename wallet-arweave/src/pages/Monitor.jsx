@@ -10,16 +10,17 @@ const MonitorPage = () => {
     const [processes, setProcesses] = useState([]);
     const [expandedProcessId, setExpandedProcessId] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
+    const [loading, setLoading] = useState(false); // Add loading state
     const navigate = useNavigate();
 
     useEffect(() => {
         getProcesses();
-        
     }, []);
 
     const getProcesses = async () => {
         if (!window.arweaveWallet) return;
         const activeWallet = await window.arweaveWallet.getActiveAddress();
+        setLoading(true); // Set loading to true when starting fetch
         try {
             const response = await axios.post('https://sam_backend.haardsolanki-itm.workers.dev/api/process/getProcesses', {
                 walletadress: activeWallet
@@ -28,10 +29,10 @@ const MonitorPage = () => {
             setProcesses(nodes);
         } catch (error) {
             console.error("Error fetching processes:", error);
+        } finally {
+            setLoading(false); // Set loading to false when fetch is complete or error occurs
         }
     };
-
-
 
     const handleExpand = (processId) => {
         if (expandedProcessId === processId) {
@@ -59,10 +60,10 @@ const MonitorPage = () => {
     return (
         <>
             <Navbar />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 font-mono">
                 <ToastContainer />
                 <div className="mb-4">
-                    <h2 className="text-2xl font-bold mb-2 text-center">Your Processes</h2>
+                    <h2 className="text-4xl font-bold mb-2 text-center hover:text-gray-300">Your AO Processes</h2>
                     <div className="relative mt-5">
                         <span className="absolute inset-y-0 left-0 pl-3 flex items-center">
                             <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -78,7 +79,15 @@ const MonitorPage = () => {
                         />
                     </div>
                 </div>
-                {filteredProcesses.length > 0 ? (
+                
+                {loading ? (
+                    <div className="flex justify-center items-center h-48">
+                        <svg className="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8l4 4-4 4v-8a8 8 0 00-8-8z"></path>
+                        </svg>
+                    </div>
+                ) : filteredProcesses.length > 0 ? (
                     <ul>
                         {filteredProcesses.map((process) => (
                             <li key={process.id} className="mb-4">
@@ -105,7 +114,7 @@ const MonitorPage = () => {
                                                         </button>
                                                         <button
                                                             onClick={() => navigate(`/analyze/${process.id}`)}
-                                                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-200"
+                                                            className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition duration-200"
                                                         >
                                                             Analyzer
                                                         </button>
@@ -116,7 +125,7 @@ const MonitorPage = () => {
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => handleExpand(process.id)}
-                                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 flex items-center transition duration-200"
+                                                className="btn btn-outline text-md flex items-center transition duration-200"
                                             >
                                                 {expandedProcessId === process.id ? (
                                                     <svg
@@ -140,13 +149,12 @@ const MonitorPage = () => {
                                             </button>
                                             <button
                                                 onClick={() => handleCopy(process.id)}
-                                                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition duration-200"
+                                                className="btn btn-outline text-md"
                                             >
                                                 Copy ID
                                             </button>
                                         </div>
                                     </div>
-
                                 </div>
                             </li>
                         ))}
@@ -156,7 +164,7 @@ const MonitorPage = () => {
                 )}
             </div>
             <div>
-                <Meteors/>
+                <Meteors />
             </div>
         </>
     );
